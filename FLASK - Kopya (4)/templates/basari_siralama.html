@@ -1,0 +1,118 @@
+<!-- templates/basari_siralama.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yüz Tanıma Uygulaması</title>
+    <style>
+        /* Stil kodları buraya eklenebilir */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Fotoğrafı yüklemek için form -->
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" accept="image/*" id="photo-input" onchange="displayPhoto()" />
+            <br>
+            <img id="uploaded-photo" alt="Uploaded Photo" style="max-width: 500px; max-height: 500px; margin-top: 10px;" />
+        </form>
+
+        <!-- Tara butonu -->
+        <button id="tara-button" onclick="tara()">Taramaya Başla</button>
+
+        <!-- Sonuç gösterilecek alan -->
+        <div id="result"></div>
+
+        <!-- Ekle butonu -->
+        <div id="ekle-div" style="display: none;">
+            <input type="text" id="ekle-input" placeholder="Yeni Klasör Adı">
+            <button id="ekle-button" onclick="ekle()">Klasör Ekle</button>
+        </div>
+    </div>
+
+    <script>
+        function displayPhoto() {
+            const input = document.getElementById('photo-input');
+            const img = document.getElementById('uploaded-photo');
+            const taraButton = document.getElementById('tara-button');
+            const ekleDiv = document.getElementById('ekle-div');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                    taraButton.style.display = 'block'; // Fotoğraf yüklendiğinde Tara butonunu göster
+                    ekleDiv.style.display = 'none'; // Yükleme sırasında Ekle bölümünü gizle
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function tara() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Tarama Sonucu: Bekleniyor...';
+
+            // Yüklü olan fotoğrafın verisi
+            const img = document.getElementById('uploaded-photo');
+            const imgData = img.src.split(',')[1]; // Base64 verisini al
+
+            // Flask API'ye POST isteği gönder
+            fetch('/tara', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image_data: imgData }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.innerHTML = 'Tarama Sonucu: ' + data.message;
+
+                // Yüz tanımlanmadıysa Ekle bölümünü göster
+                const ekleDiv = document.getElementById('ekle-div');
+                ekleDiv.style.display = data.message.includes('tanımlanamadı') ? 'block' : 'none';
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                resultDiv.innerHTML = 'Tarama sırasında bir hata oluştu.';
+            });
+        }
+
+        function ekle() {
+            const ekleInput = document.getElementById('ekle-input');
+            const yeniKlasorAdi = ekleInput.value;
+
+            // Yüklü olan fotoğrafın verisi
+            const img = document.getElementById('uploaded-photo');
+            const imgData = img.src.split(',')[1]; // Base64 verisini al
+
+            // Flask API'ye yeni klasör oluşturma ve yüz kaydetme isteği gönder
+            fetch('/ekle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    yeni_klasor_isim: yeniKlasorAdi,
+                    image_data: imgData,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+
+                // Ekleme işlemi tamamlandıktan sonra sayfayı sıfırla
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                alert('Klasör oluşturulurken bir hata oluştu.');
+            });
+        }
+    </script>
+</body>
+</html>

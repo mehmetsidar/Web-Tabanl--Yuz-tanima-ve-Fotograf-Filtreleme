@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Farklı Sayfa</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-image: url('m.png');
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #fff; /* Metin rengini beyaz olarak ayarladık. */
+}
+
+.farkli-sayfa {
+    background-color: #fff;
+    width: 80%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    color: #007bff;
+}
+
+p {
+    margin-top: 10px;
+    color: #333;
+}
+
+input[type="file"] {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    background-color: #0056b3;
+}
+
+.image-preview {
+    margin-top: 20px;
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <section class="farkli-sayfa">
+        <h1>Renkleri Ayırma İşlemi</h1>
+        <p>Lütfen bir fotoğraf yükleyin:</p>
+        <input type="file" id="photoUpload" accept="image/*">
+        <div id="imagePreview" class="image-preview"></div>
+    </section>
+    
+    <script>
+        // Fotoğraf yükleme işlemi
+        const photoUpload = document.getElementById("photoUpload");
+        const imagePreview = document.getElementById("imagePreview");
+
+        photoUpload.addEventListener("change", function () {
+            const file = photoUpload.files[0];
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    
+                    // Fotoğrafı boyutlandırma
+                    img.style.width = "50%";
+                    img.style.display = "block";
+                    img.style.margin = "0 auto";
+
+                    imagePreview.innerHTML = "";
+                    imagePreview.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = "";
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
