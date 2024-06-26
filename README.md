@@ -1,0 +1,1 @@
+Kullanılan Teknolojiler
